@@ -1,4 +1,4 @@
-name: Build recovery bundle
+name: Build and publish recovery bundle
 
 on:
   workflow_dispatch:
@@ -10,9 +10,18 @@ on:
       - "tools/build-installerx-from-source.sh"
       - ".github/workflows/build-release.yml"
 
+permissions:
+  contents: write
+
+concurrency:
+  group: rtwo-installerx-native-v1.1
+  cancel-in-progress: false
+
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,6 +29,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+          cache: gradle
 
       - name: Build InstallerX with native package ID
         env:
@@ -38,16 +48,77 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import zipfile
-          for p in Path('dist').glob('*.zip'):
-              with zipfile.ZipFile(p) as z:
-                  assert z.testzip() is None, p
-              print('OK', p)
+
+          for path in Path("dist").glob("*.zip"):
+              with zipfile.ZipFile(path) as archive:
+                  bad = archive.testzip()
+                  if bad:
+                      raise SystemExit(f"{path}: corrupt member {bad}")
+              print("OK", path)
           PY
+
           cd dist
           sha256sum -c RTWO-InstallerX-Native-v1.1-SHA256SUMS.txt
 
-      - uses: actions/upload-artifact@v4
+      - name: Preserve workflow artifact
+        uses: actions/upload-artifact@v4
         with:
           name: RTWO-InstallerX-Native-v1.1
           path: dist/*
           if-no-files-found: error
+
+      - name: Publish GitHub Release v1.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          cat > /tmp/release-notes.md <<'EOF'
+          # RTWO InstallerX Native v1.1
+
+          Systemless replacement of the Google Package Installer with InstallerX Revived on the Motorola Edge 40 Pro (`rtwo`) running Android 16.
+
+          ## Confirmed on device
+
+          - Native APK mounted at `/system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk`
+          - Package identity: `com.google.android.packageinstaller`
+          - Installation and uninstallation routed through InstallerX
+          - Application authorization and native installer controls verified
+          - Hybrid Mount directory replacement fixed through `.replace`
+
+          ## Required environment
+
+          - Motorola Edge 40 Pro (`rtwo`)
+          - Android 16 / SDK 36
+          - KernelSU Next
+          - Hybrid Mount
+          - TWRP with decrypted `/data`
+          - RTWO PackageManager Signature Bypass v1.2 enabled
+          - Thanox Zygisk disabled
+
+          ## Installation order
+
+          1. Keep `DISABLE.zip` on external storage.
+          2. Uninstall the normal `com.rosan.installer.x.revived` application.
+          3. Flash `PREPARE.zip` from TWRP.
+          4. Flash `ENABLE.zip`.
+          5. Reboot Android.
+
+          Flash `DISABLE.zip` from TWRP for immediate rollback to the stock installer.
+
+          > This build is locked to the tested RTWO firmware and is not universal.
+          EOF
+
+          mapfile -d '' ASSETS < <(find dist -maxdepth 1 -type f -print0 | sort -z)
+          test "${#ASSETS[@]}" -gt 0
+
+          if gh release view v1.1 >/dev/null 2>&1; then
+            gh release edit v1.1 \
+              --title "RTWO InstallerX Native v1.1" \
+              --notes-file /tmp/release-notes.md
+            gh release upload v1.1 "${ASSETS[@]}" --clobber
+          else
+            gh release create v1.1 "${ASSETS[@]}" \
+              --target "$GITHUB_SHA" \
+              --title "RTWO InstallerX Native v1.1" \
+              --notes-file /tmp/release-notes.md
+          fi
