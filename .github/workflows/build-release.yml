@@ -29,7 +29,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-          cache: gradle
 
       - name: Build InstallerX with native package ID
         env:
@@ -124,34 +123,44 @@ jobs:
           fi
 
       - name: Record successful Release publication
+        if: success()
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           cat > /tmp/release-status.txt <<EOF
+          status=success
           release=v1.1
           title=RTWO InstallerX Native v1.1
           published_from=$GITHUB_SHA
           published_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           assets=$(find dist -maxdepth 1 -type f | wc -l | tr -d ' ')
           EOF
-
           CONTENT="$(base64 -w0 /tmp/release-status.txt)"
           EXISTING_SHA="$(gh api "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --jq .sha 2>/dev/null || true)"
-
           if [ -n "$EXISTING_SHA" ]; then
-            jq -n \
-              --arg message "Record successful v1.1 Release publication" \
-              --arg content "$CONTENT" \
-              --arg branch "main" \
-              --arg sha "$EXISTING_SHA" \
-              '{message:$message,content:$content,branch:$branch,sha:$sha}' |
-              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --input -
+            jq -n --arg message "Record successful v1.1 Release publication" --arg content "$CONTENT" --arg branch main --arg sha "$EXISTING_SHA" '{message:$message,content:$content,branch:$branch,sha:$sha}' | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --input -
           else
-            jq -n \
-              --arg message "Record successful v1.1 Release publication" \
-              --arg content "$CONTENT" \
-              --arg branch "main" \
-              '{message:$message,content:$content,branch:$branch}' |
-              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --input -
+            jq -n --arg message "Record successful v1.1 Release publication" --arg content "$CONTENT" --arg branch main '{message:$message,content:$content,branch:$branch}' | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --input -
+          fi
+
+      - name: Record failed Release publication
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          cat > /tmp/release-failure.txt <<EOF
+          status=failure
+          release=v1.1
+          failed_from=$GITHUB_SHA
+          failed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          inspect=https://github.com/$GITHUB_REPOSITORY/actions
+          EOF
+          CONTENT="$(base64 -w0 /tmp/release-failure.txt)"
+          EXISTING_SHA="$(gh api "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1-failed.txt" --jq .sha 2>/dev/null || true)"
+          if [ -n "$EXISTING_SHA" ]; then
+            jq -n --arg message "Record failed v1.1 Release publication" --arg content "$CONTENT" --arg branch main --arg sha "$EXISTING_SHA" '{message:$message,content:$content,branch:$branch,sha:$sha}' | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1-failed.txt" --input -
+          else
+            jq -n --arg message "Record failed v1.1 Release publication" --arg content "$CONTENT" --arg branch main '{message:$message,content:$content,branch:$branch}' | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1-failed.txt" --input -
           fi
