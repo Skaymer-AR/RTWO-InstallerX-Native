@@ -9,6 +9,13 @@ on:
       - "tools/assemble-release.py"
       - "tools/build-installerx-from-source.sh"
       - ".github/workflows/build-release.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "module-source/**"
+      - "tools/assemble-release.py"
+      - "tools/build-installerx-from-source.sh"
+      - ".github/workflows/build-release.yml"
 
 permissions:
   contents: write
@@ -32,9 +39,27 @@ jobs:
 
       - name: Build InstallerX with native package ID
         env:
+          GH_TOKEN: ${{ github.token }}
           WORKDIR: ${{ github.workspace }}/build/InstallerX-Revived
           APP_ID: com.google.android.packageinstaller
-        run: ./tools/build-installerx-from-source.sh
+        shell: bash
+        run: |
+          set +e
+          ./tools/build-installerx-from-source.sh 2>&1 | tee /tmp/installerx-build.log
+          RESULT=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$RESULT" -ne 0 ]; then
+            tail -n 220 /tmp/installerx-build.log > /tmp/installerx-build-error.txt
+            CONTENT="$(base64 -w0 /tmp/installerx-build-error.txt)"
+            EXISTING_SHA="$(gh api "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1-build-error.txt" --jq .sha 2>/dev/null || true)"
+            if [ -n "$EXISTING_SHA" ]; then
+              jq -n --arg message "Record InstallerX v1.1 build error" --arg content "$CONTENT" --arg branch main --arg sha "$EXISTING_SHA" '{message:$message,content:$content,branch:$branch,sha:$sha}' | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1-build-error.txt" --input -
+            else
+              jq -n --arg message "Record InstallerX v1.1 build error" --arg content "$CONTENT" --arg branch main '{message:$message,content:$content,branch:$branch}' | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1-build-error.txt" --input -
+            fi
+            exit "$RESULT"
+          fi
 
       - name: Locate APK and assemble TWRP ZIPs
         run: |
@@ -117,7 +142,7 @@ jobs:
             gh release upload v1.1 "${ASSETS[@]}" --clobber
           else
             gh release create v1.1 "${ASSETS[@]}" \
-              --target "$GITHUB_SHA" \
+              --target main \
               --title "RTWO InstallerX Native v1.1" \
               --notes-file /tmp/release-notes.md
           fi
