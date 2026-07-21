@@ -1,0 +1,104 @@
+Cloning into '/home/runner/work/RTWO-InstallerX-Native/RTWO-InstallerX-Native/build/InstallerX-Revived'...
+HEAD is now at 5a63a946 i18n: Translations update from Hosted Weblate (#702)
+Fetching distribution.
+Downloading https://services.gradle.org/distributions/gradle-9.6.0-bin.zip
+.............10%.............20%..............30%.............40%..............50%.............60%.............70%..............80%.............90%..............100%
+
+Welcome to Gradle 9.6.0!
+
+Here are the highlights of this release:
+ - Improved Configuration Cache hit rates
+ - Additional CLI rendering options
+ - Important project hierarchy lookup deprecations
+
+For more details see https://docs.gradle.org/9.6.0/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+Configuration on demand is an incubating feature.
+Calculating task graph as no cached configuration is available for tasks: :app:assembleOnlineUnstableRelease
+> Task :build-plugins:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-plugins:generateExternalPluginSpecBuilders
+> Task :build-plugins:extractPrecompiledScriptPluginPlugins
+> Task :build-plugins:generateScriptPluginAdapters
+> Task :build-plugins:pluginDescriptors
+> Task :build-plugins:processResources
+> Task :build-plugins:compilePluginsBlocks
+> Task :build-plugins:generatePrecompiledScriptPluginAccessors
+> Task :build-plugins:compileKotlin
+> Task :build-plugins:compileJava NO-SOURCE
+> Task :build-plugins:classes
+> Task :build-plugins:jar
+
+> Configure project :app
+WARNING: The option setting 'android.r8.gradual.support=true' is experimental.
+The current default is 'false'.
+WARNING: The option setting 'android.r8.maxWorkers=4' is experimental.
+The current default is '1'.
+No custom signing info. Debug build will use the default debug keystore.
+No custom signing info. Release build will use the default debug keystore.
+
+[Incubating] Problems report is available at: file:///home/runner/work/RTWO-InstallerX-Native/RTWO-InstallerX-Native/build/InstallerX-Revived/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not determine the dependencies of task ':app:processOnlineUnstableReleaseNavigationResources'.
+> Could not resolve all dependencies for configuration ':app:onlineUnstableReleaseRuntimeClasspath'.
+   > Could not resolve top.yukonga.miuix.kmp:miuix-core-android:0.9.2-c62a511a-SNAPSHOT.
+     Required by:
+         project ':app'
+      > Could not resolve top.yukonga.miuix.kmp:miuix-core-android:0.9.2-c62a511a-SNAPSHOT.
+         > Unable to load Maven meta-data from https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-core-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml.
+            > Could not GET 'https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-core-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml'. Received status code 401 from server: Unauthorized
+   > Could not resolve top.yukonga.miuix.kmp:miuix-ui-android:0.9.2-c62a511a-SNAPSHOT.
+     Required by:
+         project ':app'
+      > Could not resolve top.yukonga.miuix.kmp:miuix-ui-android:0.9.2-c62a511a-SNAPSHOT.
+         > Unable to load Maven meta-data from https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-ui-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml.
+            > Could not GET 'https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-ui-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml'. Received status code 401 from server: Unauthorized
+   > Could not resolve top.yukonga.miuix.kmp:miuix-shader-android:0.9.2-c62a511a-SNAPSHOT.
+     Required by:
+         project ':app'
+      > Could not resolve top.yukonga.miuix.kmp:miuix-shader-android:0.9.2-c62a511a-SNAPSHOT.
+         > Unable to load Maven meta-data from https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-shader-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml.
+            > Could not GET 'https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-shader-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml'. Received status code 401 from server: Unauthorized
+   > Could not resolve top.yukonga.miuix.kmp:miuix-blur-android:0.9.2-c62a511a-SNAPSHOT.
+     Required by:
+         project ':app'
+      > Could not resolve top.yukonga.miuix.kmp:miuix-blur-android:0.9.2-c62a511a-SNAPSHOT.
+         > Unable to load Maven meta-data from https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-blur-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml.
+            > Could not GET 'https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-blur-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml'. Received status code 401 from server: Unauthorized
+   > Could not resolve top.yukonga.miuix.kmp:miuix-preference-android:0.9.2-c62a511a-SNAPSHOT.
+     Required by:
+         project ':app'
+      > Could not resolve top.yukonga.miuix.kmp:miuix-preference-android:0.9.2-c62a511a-SNAPSHOT.
+         > Unable to load Maven meta-data from https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-preference-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml.
+            > Could not GET 'https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-preference-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml'. Received status code 401 from server: Unauthorized
+   > Could not resolve top.yukonga.miuix.kmp:miuix-icons-android:0.9.2-c62a511a-SNAPSHOT.
+     Required by:
+         project ':app'
+      > Could not resolve top.yukonga.miuix.kmp:miuix-icons-android:0.9.2-c62a511a-SNAPSHOT.
+         > Unable to load Maven meta-data from https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-icons-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml.
+            > Could not GET 'https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-icons-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml'. Received status code 401 from server: Unauthorized
+   > Could not resolve top.yukonga.miuix.kmp:miuix-navigation3-ui-android:0.9.2-c62a511a-SNAPSHOT.
+     Required by:
+         project ':app'
+      > Could not resolve top.yukonga.miuix.kmp:miuix-navigation3-ui-android:0.9.2-c62a511a-SNAPSHOT.
+         > Unable to load Maven meta-data from https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-navigation3-ui-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml.
+            > Could not GET 'https://maven.pkg.github.com/compose-miuix-ui/miuix/top/yukonga/miuix/kmp/miuix-navigation3-ui-android/0.9.2-c62a511a-SNAPSHOT/maven-metadata.xml'. Received status code 401 from server: Unauthorized
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 29s
+9 actionable tasks: 9 executed
+Configuration cache entry stored.
