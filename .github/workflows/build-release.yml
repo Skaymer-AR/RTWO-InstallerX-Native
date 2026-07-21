@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: rtwo-installerx-native-v1.1
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-release:
@@ -121,4 +121,37 @@ jobs:
               --target "$GITHUB_SHA" \
               --title "RTWO InstallerX Native v1.1" \
               --notes-file /tmp/release-notes.md
+          fi
+
+      - name: Record successful Release publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          cat > /tmp/release-status.txt <<EOF
+          release=v1.1
+          title=RTWO InstallerX Native v1.1
+          published_from=$GITHUB_SHA
+          published_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          assets=$(find dist -maxdepth 1 -type f | wc -l | tr -d ' ')
+          EOF
+
+          CONTENT="$(base64 -w0 /tmp/release-status.txt)"
+          EXISTING_SHA="$(gh api "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --jq .sha 2>/dev/null || true)"
+
+          if [ -n "$EXISTING_SHA" ]; then
+            jq -n \
+              --arg message "Record successful v1.1 Release publication" \
+              --arg content "$CONTENT" \
+              --arg branch "main" \
+              --arg sha "$EXISTING_SHA" \
+              '{message:$message,content:$content,branch:$branch,sha:$sha}' |
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --input -
+          else
+            jq -n \
+              --arg message "Record successful v1.1 Release publication" \
+              --arg content "$CONTENT" \
+              --arg branch "main" \
+              '{message:$message,content:$content,branch:$branch}' |
+              gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/.release-status/v1.1.txt" --input -
           fi
