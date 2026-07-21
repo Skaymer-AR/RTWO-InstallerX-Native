@@ -1,5 +1,5 @@
 status=failure
 release=v1.1
-failed_from=f5aeb81fbe0bb6c80dbc762b774a3849f7fbf10c
-failed_at=2026-07-21T20:09:23Z
+failed_from=ba352ab7b28969f53cb1feb468a6b1fb716e009d
+failed_at=2026-07-21T20:14:17Z
 inspect=https://github.com/Skaymer-AR/RTWO-InstallerX-Native/actions
