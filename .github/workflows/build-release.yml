@@ -9,6 +9,13 @@ on:
       - "tools/assemble-release.py"
       - "tools/build-installerx-from-source.sh"
       - ".github/workflows/build-release.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "module-source/**"
+      - "tools/assemble-release.py"
+      - "tools/build-installerx-from-source.sh"
+      - ".github/workflows/build-release.yml"
 
 permissions:
   contents: write
@@ -117,7 +124,7 @@ jobs:
             gh release upload v1.1 "${ASSETS[@]}" --clobber
           else
             gh release create v1.1 "${ASSETS[@]}" \
-              --target "$GITHUB_SHA" \
+              --target main \
               --title "RTWO InstallerX Native v1.1" \
               --notes-file /tmp/release-notes.md
           fi
