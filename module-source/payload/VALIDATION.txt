@@ -1,0 +1,14 @@
+Safety and design:
+- PREPARE installs the module disabled.
+- ENABLE refuses to continue if signature bypass is disabled.
+- ENABLE refuses to continue if Thanox Zygisk is active.
+- PREPARE refuses to continue while the original com.rosan InstallerX app is installed,
+  because both packages would declare the same provider authorities.
+- Stock GooglePackageInstaller hash is checked before installation and activation.
+- SELinux system_file context is applied and verified.
+- DISABLE restores the stock installer on the next boot.
+- System, system_ext, product and super are never physically modified.
+- Hybrid Mount presence and enabled state are checked before PREPARE/ENABLE.
+- UPDATE_APP_OPS_STATS is explicitly allowlisted for the non-platform-signed native APK.
+
+- v1.1 creates and verifies GooglePackageInstaller/.replace so Hybrid Mount replaces the complete stock app directory rather than merging it.

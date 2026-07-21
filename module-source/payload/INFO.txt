@@ -1,0 +1,30 @@
+RTWO InstallerX Native v1.1
+
+Target:
+- Device: Motorola Edge 40 Pro (rtwo)
+- Android: SDK 36 / Android 16
+- Stock package: com.google.android.packageinstaller
+- Stock path: /system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk
+- Stock SHA-256: c826d4f46f6180897b9246960fbbbe0b8b0a9c05259f51bbfab9e0645aca9a3f
+
+Source InstallerX:
+- Original package: com.rosan.installer.x.revived
+- Version: 26.06.5a63a94 (1422)
+- Original APK SHA-256: b7ad13b623f421807b603a2159edc84069aa98650c270bb1615adc78770acf7d
+
+Adapted native APK:
+- Package: com.google.android.packageinstaller
+- APK SHA-256: dbae3bc57ecb130b282fed16799d46b2342db46980caab15457ac0338d32fa07
+- APK Signature Scheme v2: verified
+
+The original Google installer is not erased. Hybrid Mount overlays the adapted APK.
+
+Privileged allowlist:
+- INSTALL_PACKAGES
+- DELETE_PACKAGES
+- MANAGE_USERS
+- UPDATE_APP_OPS_STATS
+
+v1.1 confirmed fix:
+- Adds system/priv-app/GooglePackageInstaller/.replace.
+- This was required for Hybrid Mount to expose the adapted APK instead of the stock APK.

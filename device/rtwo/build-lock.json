@@ -1,0 +1,14 @@
+{
+  "device": "rtwo",
+  "model": "Motorola Edge 40 Pro",
+  "android": 16,
+  "sdk": 36,
+  "stock_package_installer_path": "/system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk",
+  "stock_package_installer_package": "com.google.android.packageinstaller",
+  "stock_package_installer_sha256": "c826d4f46f6180897b9246960fbbbe0b8b0a9c05259f51bbfab9e0645aca9a3f",
+  "installerx_upstream_commit": "5a63a9465129f547031fa8d1d7f3a945beeb732b",
+  "installerx_source_apk_sha256": "b7ad13b623f421807b603a2159edc84069aa98650c270bb1615adc78770acf7d",
+  "installerx_native_apk_sha256": "dbae3bc57ecb130b282fed16799d46b2342db46980caab15457ac0338d32fa07",
+  "services_original_sha256": "6c0d2b474ac5f98b6291c8a9cf49758027e63e32a7939e6836b78fb0e8dc6a22",
+  "services_patched_sha256": "07b804d3700b83155932a398ef07caecfce3e6a19724007ad89250da0f9fdad1"
+}

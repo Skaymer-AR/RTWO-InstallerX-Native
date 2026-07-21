@@ -1,0 +1,32 @@
+#!/sbin/sh
+OUTFD="$2"
+ZIPFILE="$3"
+TMP="/tmp/rtwo-installerx-native-probe-v1"
+
+ui_print() {
+  echo "ui_print $*" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+  echo "ui_print" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+}
+
+abort_probe() {
+  ui_print "[ERROR] $*"
+  exit 1
+}
+
+rm -rf "$TMP"
+mkdir -p "$TMP" || abort_probe "Cannot create temporary directory."
+
+if [ -x /sbin/unzip ]; then
+  /sbin/unzip -o "$ZIPFILE" tools/probe.sh -d "$TMP" >/dev/null 2>&1
+elif command -v unzip >/dev/null 2>&1; then
+  unzip -o "$ZIPFILE" tools/probe.sh -d "$TMP" >/dev/null 2>&1
+elif [ -x /tmp/busybox ]; then
+  /tmp/busybox unzip -o "$ZIPFILE" tools/probe.sh -d "$TMP" >/dev/null 2>&1
+else
+  abort_probe "No unzip implementation available."
+fi
+
+[ -f "$TMP/tools/probe.sh" ] || abort_probe "Probe extraction failed."
+chmod 0755 "$TMP/tools/probe.sh" || abort_probe "Cannot execute probe."
+export OUTFD
+exec /sbin/sh "$TMP/tools/probe.sh"

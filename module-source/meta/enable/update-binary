@@ -1,0 +1,33 @@
+#!/sbin/sh
+OUTFD="$2"
+ZIPFILE="$3"
+TMP="/tmp/rtwo-installerx-native-enable.sh"
+
+ui_print() {
+  echo "ui_print $*" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+  echo "ui_print" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+}
+
+abort_entry() {
+  ui_print "[ERROR] $*"
+  exit 1
+}
+
+rm -rf "$TMP"
+mkdir -p "$TMP" || abort_entry "Cannot create temporary directory."
+
+FILES="tools/enable.sh "
+if [ -x /sbin/unzip ]; then
+  /sbin/unzip -o "$ZIPFILE" $FILES -d "$TMP" >/dev/null 2>&1
+elif command -v unzip >/dev/null 2>&1; then
+  unzip -o "$ZIPFILE" $FILES -d "$TMP" >/dev/null 2>&1
+elif [ -x /tmp/busybox ]; then
+  /tmp/busybox unzip -o "$ZIPFILE" $FILES -d "$TMP" >/dev/null 2>&1
+else
+  abort_entry "No unzip implementation available."
+fi
+
+[ -f "$TMP/tools/enable.sh" ] || abort_entry "Action script was not extracted."
+chmod 0755 "$TMP/tools/enable.sh"
+export OUTFD TMP ZIPFILE
+exec /sbin/sh "$TMP/tools/enable.sh"

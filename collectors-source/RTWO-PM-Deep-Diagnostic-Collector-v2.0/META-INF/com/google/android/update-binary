@@ -1,0 +1,32 @@
+#!/sbin/sh
+OUTFD="$2"
+ZIPFILE="$3"
+TMP="/tmp/rtwo-pm-deep-diag-v2"
+
+ui_print() {
+  echo "ui_print $*" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+  echo "ui_print" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+}
+
+abort_install() {
+  ui_print "[ERROR] $*"
+  exit 1
+}
+
+rm -rf "$TMP"
+mkdir -p "$TMP" || abort_install "Cannot create temporary directory."
+
+if [ -x /sbin/unzip ]; then
+  /sbin/unzip -o "$ZIPFILE" tools/collect.sh -d "$TMP" >/dev/null 2>&1
+elif command -v unzip >/dev/null 2>&1; then
+  unzip -o "$ZIPFILE" tools/collect.sh -d "$TMP" >/dev/null 2>&1
+elif [ -x /tmp/busybox ]; then
+  /tmp/busybox unzip -o "$ZIPFILE" tools/collect.sh -d "$TMP" >/dev/null 2>&1
+else
+  abort_install "No unzip implementation available."
+fi
+
+[ -f "$TMP/tools/collect.sh" ] || abort_install "Collector extraction failed."
+chmod 0755 "$TMP/tools/collect.sh" || abort_install "Cannot execute collector."
+export OUTFD
+exec /sbin/sh "$TMP/tools/collect.sh"

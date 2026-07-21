@@ -1,0 +1,42 @@
+#!/sbin/sh
+# RTWO Package Manager Framework Collector
+# Args supplied by recovery: api_version, output_fd, zip_path
+OUTFD="$2"
+ZIPFILE="$3"
+TMPBASE="/tmp/rtwo-pm-collector"
+
+ui_print() {
+  echo "ui_print $*" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+  echo "ui_print" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+}
+
+abort_install() {
+  ui_print "[ERROR] $*"
+  ui_print "No se modificó ninguna partición."
+  exit 1
+}
+
+rm -rf "$TMPBASE"
+mkdir -p "$TMPBASE" || abort_install "No se pudo crear $TMPBASE"
+
+UNZIP_BIN=""
+for c in unzip /sbin/unzip /system/bin/unzip /tmp/busybox; do
+  if [ -x "$c" ] || command -v "$c" >/dev/null 2>&1; then
+    UNZIP_BIN="$c"
+    break
+  fi
+done
+
+if [ -z "$UNZIP_BIN" ]; then
+  abort_install "TWRP no ofrece unzip/busybox para extraer el recolector."
+fi
+
+if [ "$UNZIP_BIN" = "/tmp/busybox" ]; then
+  "$UNZIP_BIN" unzip -o "$ZIPFILE" tools/collector.sh -d "$TMPBASE" >/dev/null 2>&1 || abort_install "No se pudo extraer collector.sh"
+else
+  "$UNZIP_BIN" -o "$ZIPFILE" tools/collector.sh -d "$TMPBASE" >/dev/null 2>&1 || abort_install "No se pudo extraer collector.sh"
+fi
+
+chmod 0755 "$TMPBASE/tools/collector.sh" || abort_install "No se pudo preparar collector.sh"
+export OUTFD
+exec /sbin/sh "$TMPBASE/tools/collector.sh" "$ZIPFILE"

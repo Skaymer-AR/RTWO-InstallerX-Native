@@ -1,0 +1,38 @@
+#!/sbin/sh
+# RTWO PM Bootloop Diagnostic Collector v1.0
+OUTFD="$2"
+ZIPFILE="$3"
+TMPBASE="/tmp/rtwo-pm-bootloop-diag-v1"
+
+ui_print() {
+  echo "ui_print $*" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+  echo "ui_print" > "/proc/self/fd/$OUTFD" 2>/dev/null || true
+}
+
+abort_entry() {
+  ui_print "[ERROR] $*"
+  exit 1
+}
+
+rm -rf "$TMPBASE"
+mkdir -p "$TMPBASE" || abort_entry "Cannot create temporary directory."
+
+UNZIP_BIN=""
+for c in /sbin/unzip /system/bin/unzip unzip /tmp/busybox; do
+  if [ -x "$c" ] || command -v "$c" >/dev/null 2>&1; then
+    UNZIP_BIN="$c"
+    break
+  fi
+done
+[ -n "$UNZIP_BIN" ] || abort_entry "No unzip implementation is available."
+
+if [ "$UNZIP_BIN" = "/tmp/busybox" ]; then
+  "$UNZIP_BIN" unzip -o "$ZIPFILE" tools/collect.sh -d "$TMPBASE" >/dev/null 2>&1 || abort_entry "Cannot extract collector."
+else
+  "$UNZIP_BIN" -o "$ZIPFILE" tools/collect.sh -d "$TMPBASE" >/dev/null 2>&1 || abort_entry "Cannot extract collector."
+fi
+
+[ -f "$TMPBASE/tools/collect.sh" ] || abort_entry "collect.sh was not extracted."
+chmod 0755 "$TMPBASE/tools/collect.sh" || abort_entry "Cannot make collector executable."
+export OUTFD
+exec /sbin/sh "$TMPBASE/tools/collect.sh"

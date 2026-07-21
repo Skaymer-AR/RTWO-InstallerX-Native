@@ -1,0 +1,19 @@
+name: Validate source
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shell syntax
+        run: |
+          find . -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
+      - name: Validate Python syntax
+        run: python3 -m py_compile tools/assemble-release.py
+      - name: Verify no private/proprietary payloads are tracked
+        run: |
+          ! find . -type f \( -name 'services.jar' -o -name '*.img' -o -name '*.jks' -o -name '*.keystore' \) | grep .
