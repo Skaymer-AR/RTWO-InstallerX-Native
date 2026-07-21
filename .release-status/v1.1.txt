@@ -1,6 +1,6 @@
 status=success
 release=v1.1
 title=RTWO InstallerX Native v1.1
-published_from=e601bd338ca48ba7665d63dd9c57c742646767b9
-published_at=2026-07-21T20:25:19Z
+published_from=857bdc74d37ec43975e7005bbe6cd6a650c511ac
+published_at=2026-07-21T20:34:35Z
 assets=7
