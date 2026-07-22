@@ -1,0 +1,126 @@
+name: Publish PM signature bypass
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "signature-bypass/**"
+      - ".github/workflows/publish-signature-bypass.yml"
+  pull_request:
+    paths:
+      - "signature-bypass/**"
+      - ".github/workflows/publish-signature-bypass.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rtwo-pm-signature-bypass-v1.2
+  cancel-in-progress: true
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build reproducible TWRP archives
+        run: |
+          python3 signature-bypass/build_release.py \
+            --manifest signature-bypass/patch-manifest.json \
+            --out dist-signature-bypass
+
+      - name: Validate generated archives and scripts
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          for path in Path("dist-signature-bypass").glob("*.zip"):
+              with zipfile.ZipFile(path) as archive:
+                  bad = archive.testzip()
+                  if bad:
+                      raise SystemExit(f"{path}: corrupt member {bad}")
+              print("OK", path)
+          PY
+          cd dist-signature-bypass
+          sha256sum -c RTWO-PM-Signature-Bypass-v1.2-SHA256SUMS.txt
+          rm -rf /tmp/rtwo-pm-scripts
+          mkdir -p /tmp/rtwo-pm-scripts
+          for archive in *-PREPARE.zip *-ENABLE.zip *-DISABLE.zip *-REMOVE.zip; do
+            unzip -oq "$archive" 'tools/*.sh' 'META-INF/com/google/android/update-binary' -d /tmp/rtwo-pm-scripts
+          done
+          find /tmp/rtwo-pm-scripts -type f \( -name '*.sh' -o -name update-binary \) -print0 | xargs -0 -n1 bash -n
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RTWO-PM-Signature-Bypass-v1.2
+          path: dist-signature-bypass/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          cat > /tmp/notes.md <<'NOTES'
+          # RTWO PackageManager Signature Bypass v1.2
+
+          Public reproducible build for the Motorola Edge 40 Pro (`rtwo`) on Android 16 / SDK 36.
+
+          PREPARE reconstructs the patched framework overlay from the exact stock `services.jar` on the device. The complete Motorola framework binary is not redistributed.
+
+          ## Required
+
+          - KernelSU Next and Hybrid Mount
+          - TWRP with decrypted `/data`
+          - exact stock framework hash documented in the repository
+          - Thanox Zygisk disabled
+
+          ## Installation
+
+          1. Keep DISABLE on external storage.
+          2. Flash PREPARE.
+          3. Flash ENABLE.
+          4. Reboot Android.
+
+          ENABLE is compatible with both the existing private rebuilt payload and the public reproducible payload.
+
+          > Warning: this disables package-signature enforcement and materially weakens Android security. It is intended for a laboratory device only.
+          NOTES
+
+          mapfile -d '' ASSETS < <(find dist-signature-bypass -maxdepth 1 -type f -print0 | sort -z)
+          TAG="pm-signature-bypass-v1.2"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "RTWO PM Signature Bypass v1.2" --notes-file /tmp/notes.md
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" \
+              --target "$GITHUB_SHA" \
+              --title "RTWO PM Signature Bypass v1.2" \
+              --notes-file /tmp/notes.md
+          fi
+
+      - name: Record successful publication
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          cat > /tmp/status.txt <<EOF2
+          status=success
+          release=pm-signature-bypass-v1.2
+          published_from=$GITHUB_SHA
+          published_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          assets=$(find dist-signature-bypass -maxdepth 1 -type f | wc -l | tr -d ' ')
+          generated_services_sha256=cc9e49186fa56a2d144dd528133915989c4f247196d1d597b36e07e20a6d340c
+          EOF2
+          CONTENT="$(base64 -w0 /tmp/status.txt)"
+          PATH_API="repos/$GITHUB_REPOSITORY/contents/.release-status/pm-signature-bypass-v1.2.txt"
+          EXISTING_SHA="$(gh api "$PATH_API" --jq .sha 2>/dev/null || true)"
+          if [ -n "$EXISTING_SHA" ]; then
+            jq -n --arg message "Record PM signature bypass v1.2 publication" --arg content "$CONTENT" --arg branch main --arg sha "$EXISTING_SHA" '{message:$message,content:$content,branch:$branch,sha:$sha}' | gh api --method PUT "$PATH_API" --input -
+          else
+            jq -n --arg message "Record PM signature bypass v1.2 publication" --arg content "$CONTENT" --arg branch main '{message:$message,content:$content,branch:$branch}' | gh api --method PUT "$PATH_API" --input -
+          fi
