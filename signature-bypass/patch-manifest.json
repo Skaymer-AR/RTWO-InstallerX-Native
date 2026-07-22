@@ -1,0 +1,15 @@
+{
+  "device": "rtwo",
+  "sdk": 36,
+  "source_sha256": "6c0d2b474ac5f98b6291c8a9cf49758027e63e32a7939e6836b78fb0e8dc6a22",
+  "generated_sha256": "cc9e49186fa56a2d144dd528133915989c4f247196d1d597b36e07e20a6d340c",
+  "legacy_private_sha256": "07b804d3700b83155932a398ef07caecfce3e6a19724007ad89250da0f9fdad1",
+  "patches": [
+    {"name": "classes2-dex-header.bin", "offset": 10569484, "hex": "8739f0d0cc81ff6dfc56b085376c0cfbbedf4fa579d84aa7"},
+    {"name": "prepare-signature-block.bin", "offset": 14227278, "hex": "29001800000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+    {"name": "upgrade-keyset-return.bin", "offset": 14267652, "hex": "12000f00"},
+    {"name": "verify-signatures-return.bin", "offset": 14437120, "hex": "12000f00"},
+    {"name": "classes2-local-crc.bin", "offset": 10569446, "hex": "d6c1469b"},
+    {"name": "classes2-central-crc.bin", "offset": 25934153, "hex": "d6c1469b"}
+  ]
+}
